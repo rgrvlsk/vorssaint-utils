@@ -34,7 +34,7 @@ extension FeatureStrings {
 
 extension BatteryTimeFeatureStrings {
     static let enUS = BatteryTimeFeatureStrings(
-        title: "Battery time remaining",
+        title: "Battery time left",
         systemEstimate: "System estimate",
         calculating: "Calculating…"
     )
