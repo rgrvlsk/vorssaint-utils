@@ -393,7 +393,7 @@ extension AppUpdateStrings {
         includeOnlineCaption: "Consulta directament els desenvolupadors de les apps quan és possible i després fa servir un catàleg públic. L’app instal·la l’actualització amb el seu propi actualitzador.",
         incompleteCheck: "Comprovació incompleta",
         onlineUnavailable: "No s’ha pogut completar la comprovació en línia. Els altres resultats continuen visibles.",
-        skipVersionFormat: "Omet la versió %@",
+        skipVersionFormat: "Omet la versió %d %@",
         excludeApp: "No comprovis aquesta app",
         rulesTitle: "Excepcions d’actualització",
         addException: "Afegeix una app que no s’hagi de comprovar",
