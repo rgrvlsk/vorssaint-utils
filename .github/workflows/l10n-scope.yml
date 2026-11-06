@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   detect:
+    name: Is this a translation PR?
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -44,6 +45,7 @@ jobs:
           echo "lang=$lang" >> "$GITHUB_OUTPUT"
 
   scope:
+    name: Only one language's strings change
     needs: detect
     if: needs.detect.outputs.lang != ''
     runs-on: ubuntu-latest
