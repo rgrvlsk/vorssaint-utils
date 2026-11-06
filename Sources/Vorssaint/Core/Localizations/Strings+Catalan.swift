@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Vorssaint
 
+// l10n-reviewed: 5867345d @rgrvlsk
 import Foundation
 
 // Català. These notes apply to this file and to the `ca` entry of every feature catalog.
