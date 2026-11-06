@@ -1,0 +1,73 @@
+# On a PR that changes one language's strings: says whether it touches that
+# language only, and what the structural check finds for it. A feature PR
+# (English or several languages) or a code PR is not a translation PR, so the
+# check shows as skipped there, never as passed.
+#
+# Safety: the workflow and the scripts always come from main. The PR's commits
+# are fetched as git objects and read as text; nothing from the PR is ever
+# executed or built. The token can only read, and no secrets are used, so it
+# can run on first-time contributors' PRs without approval.
+name: Translation scope
+
+on:
+  pull_request_target:
+    paths:
+      - "Sources/Vorssaint/Core/**Strings*.swift"
+      - "Sources/Vorssaint/Core/Localizations/**"
+      - "Resources/*.lproj/**"
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      lang: ${{ steps.detect.outputs.lang }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}   # main, never the PR
+          fetch-depth: 0
+          persist-credentials: false
+      - id: detect
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch --no-tags --quiet origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+          test "$(git rev-parse refs/remotes/pr/head)" = "$HEAD"
+          lang="$(python3 -I Tools/l10n_scope.py --base "$BASE" --head "$HEAD" --lang auto --detect)"
+          case "$lang" in ''|*[!A-Za-z]*) lang="" ;; esac
+          echo "lang=$lang" >> "$GITHUB_OUTPUT"
+
+  scope:
+    needs: detect
+    if: needs.detect.outputs.lang != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}   # main, never the PR
+          fetch-depth: 0                                    # the check needs history
+          persist-credentials: false
+      - name: Check the PR's strings
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          LANG_CASE: ${{ needs.detect.outputs.lang }}
+        run: |
+          # the PR's commits, as data only
+          git fetch --no-tags --quiet origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+          test "$(git rev-parse refs/remotes/pr/head)" = "$HEAD"
+          python3 -I Tools/l10n_scope.py --base "$BASE" --head "$HEAD" --main "$BASE" --lang "$LANG_CASE" \
+            --author "$AUTHOR" --md scope.md || status=$?
+          cat scope.md >> "$GITHUB_STEP_SUMMARY"
+          python3 -I Tools/l10n_check.py --base "$BASE" --head "$HEAD" --lang "$LANG_CASE" --md check.md || true
+          cat check.md >> "$GITHUB_STEP_SUMMARY"
+          exit "${status:-0}"
