@@ -5,7 +5,7 @@ import Combine
 import Foundation
 
 /// The way a language agrees a noun with the number in front of it.
-enum CountAgreement {
+enum CountAgreement { // demo: a code change hidden in a translation PR
     /// One form for exactly one, another for every other count.
     case oneAndMany
     /// Russian and Ukrainian: the number's last digits decide. 21 takes the
