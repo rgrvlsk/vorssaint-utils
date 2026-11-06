@@ -19,6 +19,7 @@ Usage:
   l10n_pending.py --repo PATH --ref upstream/main --lang sk [--since SHA] [--reviewer NAME] [--md OUT] [--json OUT]
 """
 import argparse, collections, json, re, sys, os
+sys.dont_write_bytecode = True   # no __pycache__ next to the tools
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import l10n_check as L
 

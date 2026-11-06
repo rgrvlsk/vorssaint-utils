@@ -24,6 +24,7 @@ Usage:
 Exit status: 0 in scope (or a new language), 1 out of scope.
 """
 import argparse, os, re, subprocess, sys
+sys.dont_write_bytecode = True   # no __pycache__ next to the tools
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import l10n_check as L
 

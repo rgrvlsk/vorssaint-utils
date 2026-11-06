@@ -351,9 +351,9 @@ def interpolations(v):
 
 def safe(text):
     """text from the repository, made inert for a Markdown summary: no
-    mentions, links, images or HTML"""
+    mentions, links, images or HTML, while staying readable in a terminal"""
     t = str(text).replace('@', '@\u200b').replace('<', '&lt;').replace('>', '&gt;')
-    return re.sub(r'([\[\]()!])', r'\\\1', t)
+    return re.sub(r'([\[\]])', r'\\\1', t)   # no [text](url) or ![image](url) can form
 
 def words(v):
     return re.findall(r'[^\W\d_]{2,}', v)
@@ -588,10 +588,7 @@ def run(git, head, base, lang, blame=True, history=(), exclude=()):
            or (p.count('/') == 0 and p.endswith('.md') and p not in ('CONTRIBUTING.md', 'CHANGELOG.md')):
             add('M7', p, 1, f'{p} is outside what a translation needs')
     if 'CHANGELOG.md' in own:
-        ns = git.run('show', '--numstat', '--format=', *mine, '--', 'CHANGELOG.md').split()
-        added = sum(int(x) for x in ns[0::3] if x.isdigit())
-        if added > 2:
-            add('M7', 'CHANGELOG.md', 1, f'CHANGELOG.md: {added} lines added by the branch; a new language needs one line under Unreleased')
+        add('M7', 'CHANGELOG.md', 1, 'CHANGELOG.md: CONTRIBUTING leaves CHANGELOG.md to the maintainer; describe the change in the PR instead')
     # entries main already released, brought back under Unreleased by a merge
     def sections(src):
         cur, out = None, {}
@@ -663,4 +660,7 @@ if __name__ == '__main__':
     md = markdown(F, meta)
     if a.md: open(a.md, 'w').write(md)
     c = collections.Counter(f['cat'] for f in F)
-    print(' '.join(f'{k}={c[k]}' for k in CAT if k in BLOCK + REVIEW and c[k]) or 'no findings')
+    if a.md or a.json:
+        print(' '.join(f'{k}={c[k]}' for k in CAT if k in BLOCK + REVIEW and c[k]) or 'no findings')
+    else:
+        print(md)
